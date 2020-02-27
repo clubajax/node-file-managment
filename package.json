@@ -1,5 +1,5 @@
 {
-  "name": "file-managment",
+  "name": "@clubajax/node-file-managment",
   "version": "0.1.0",
   "description": "Node file management",
   "main": "index.js",
