@@ -121,6 +121,35 @@ function writeJson(jsonPath, data) {
     fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
 }
 
+function updateBuildPackage(src = './scripts', dst = './build') {
+    const srcPkg = path.resolve(src, '/package.json');
+    const bldPkg = path.resolve(dst, '/package.json');
+    const buildPackage = files.readJson(srcPkg);
+    const mainPackage = files.readJson('./package.json');
+
+    if (mainPackage.version !== buildPackage.version) {
+        // main has been manually updated
+    } else {
+        // increment main version
+        const version = mainPackage.version.split('.');
+        version[2] = parseInt(version[2], 10) + 1;
+        mainPackage.version = version.join('.');
+        console.log('package.version changed to:', mainPackage.version);
+    }
+    buildPackage.version = mainPackage.version;
+    const keysToCopy = ['dependencies', 'repository', 'keywords'];
+    keysToCopy.forEach((key) => {
+        if (mainPackage[key]) {
+            buildPackage[key] = mainPackage[key];
+        }
+    });
+
+    files.writeJson(srcPkg, buildPackage);
+    files.writeJson('./package.json', mainPackage);
+    files.copyFile(srcPkg, bldPkg);
+    console.log('package.version updated to:', mainPackage.version);
+}
+
 module.exports = {
     getFile,
     getFileName,
@@ -130,5 +159,6 @@ module.exports = {
     mkdir,
     copyFile,
     readJson,
-    writeJson
+    writeJson,
+    updateBuildPackage
 };
