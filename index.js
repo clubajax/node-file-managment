@@ -124,8 +124,8 @@ function writeJson(jsonPath, data) {
 function updateBuildPackage(src = './scripts', dst = './build') {
     const srcPkg = path.resolve(src, '/package.json');
     const bldPkg = path.resolve(dst, '/package.json');
-    const buildPackage = files.readJson(srcPkg);
-    const mainPackage = files.readJson('./package.json');
+    const buildPackage = readJson(srcPkg);
+    const mainPackage = readJson('./package.json');
 
     if (mainPackage.version !== buildPackage.version) {
         // main has been manually updated
@@ -144,9 +144,9 @@ function updateBuildPackage(src = './scripts', dst = './build') {
         }
     });
 
-    files.writeJson(srcPkg, buildPackage);
-    files.writeJson('./package.json', mainPackage);
-    files.copyFile(srcPkg, bldPkg);
+    writeJson(srcPkg, buildPackage);
+    writeJson('./package.json', mainPackage);
+    copyFile(srcPkg, bldPkg);
     console.log('package.version updated to:', mainPackage.version);
 }
 
