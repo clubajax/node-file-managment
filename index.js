@@ -122,8 +122,14 @@ function writeJson(jsonPath, data) {
 }
 
 function updateBuildPackage(src = './scripts', dst = './build') {
-    const srcPkg = path.resolve(src, '/package.json');
-    const bldPkg = path.resolve(dst, '/package.json');
+    const srcPkg = path.join(src, '/package.json');
+    const bldPkg = path.join(dst, '/package.json');
+    if (!fs.existsSync(srcPkg)) {
+        throw new Error(`source package not found with path: ${srcPkg}`);   
+    }
+    if (!fs.existsSync(dst)) {
+        throw new Error(`build directory not found with path: ${dst}`);   
+    }
     const buildPackage = readJson(srcPkg);
     const mainPackage = readJson('./package.json');
 
