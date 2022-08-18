@@ -3,6 +3,14 @@ const fs = require('fs');
 
 const exclude = ''.split(',');
 
+function isJK() {
+    const p = process.argv[2];
+    if (p && typeof p === 'string' && /jk/.test(p)){
+        return true
+    }
+    return false;
+}
+
 function writeFiles(files) {
     let count = 0;
     files.forEach((file) => {
@@ -122,7 +130,8 @@ function writeJson(jsonPath, data) {
 }
 
 function updateBuildPackage(src = './scripts', dst = './build') {
-    const srcPkg = path.join(src, '/package.json');
+    const srcPkgName = isJK() ? '/jk-package.json' : '/package.json'
+    const srcPkg = path.join(src, srcPkgName);
     const bldPkg = path.join(dst, '/package.json');
     if (!fs.existsSync(srcPkg)) {
         throw new Error(`source package not found with path: ${srcPkg}`);   
