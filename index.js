@@ -130,19 +130,30 @@ function writeJson(jsonPath, data) {
 }
 
 function updateBuildPackage(src = './scripts', dst = './build') {
-    const srcPkgName = isJK() ? '/jk-package.json' : '/package.json'
-    const srcPkg = path.join(src, srcPkgName);
+    if (isJK()) {
+        console.log('building JK package...');
+    }
+    let hasJk = true;
+    let jkPackage;
+    const jkPkg = path.join(src, '/jk-package.json');
+    const srcPkg = path.join(src, '/package.json');
     const bldPkg = path.join(dst, '/package.json');
+    if (!fs.existsSync(jkPkg)) {
+        hasJk = false;
+    }
     if (!fs.existsSync(srcPkg)) {
         throw new Error(`source package not found with path: ${srcPkg}`);   
     }
     if (!fs.existsSync(dst)) {
         throw new Error(`build directory not found with path: ${dst}`);   
     }
-    const buildPackage = readJson(srcPkg);
+    if (hasJk) {
+        jkPackage = readJson(jkPkg);
+    }
+    const sourcePackage = readJson(srcPkg);
     const mainPackage = readJson('./package.json');
 
-    if (mainPackage.version !== buildPackage.version) {
+    if (mainPackage.version !== sourcePackage.version) {
         // main has been manually updated
     } else {
         // increment main version
@@ -151,18 +162,37 @@ function updateBuildPackage(src = './scripts', dst = './build') {
         mainPackage.version = version.join('.');
         console.log('package.version changed to:', mainPackage.version);
     }
-    buildPackage.version = mainPackage.version;
-    const keysToCopy = ['dependencies', 'repository', 'keywords'];
+    sourcePackage.version = mainPackage.version;
+    if (hasJk) {
+        jkPackage.version = mainPackage.version;
+    }
+    const keysToCopy = isJK() ? ['dependencies'] : ['dependencies', 'repository', 'keywords'];
     keysToCopy.forEach((key) => {
         if (mainPackage[key]) {
-            buildPackage[key] = mainPackage[key];
+            sourcePackage[key] = mainPackage[key];
+            if (hasJk) {
+                jkPackage[key] = mainPackage[key];
+            }
         }
     });
 
-    writeJson(srcPkg, buildPackage);
+    if (hasJk) {
+        writeJson(jkPkg, jkPackage);
+    }
+    writeJson(srcPkg, sourcePackage);
     writeJson('./package.json', mainPackage);
-    copyFile(srcPkg, bldPkg);
+    copyFile(isJK() ? jkPkg : srcPkg, bldPkg);
     console.log('package.version updated to:', mainPackage.version);
+}
+
+function swapJK(...filenames) { 
+    const bldSrc = './build'
+    filenames.forEach((filename) => { 
+        const filePath = path.join(bldSrc, path.sep, filename);
+        console.log('swapping text for', filePath);
+        const file = fs.readFileSync(filePath).toString().replace(/@clubajax/g, '@janiking')
+        fs.writeFileSync(filePath, file);
+    })
 }
 
 module.exports = {
@@ -175,5 +205,6 @@ module.exports = {
     copyFile,
     readJson,
     writeJson,
+    swapJK,
     updateBuildPackage
 };
