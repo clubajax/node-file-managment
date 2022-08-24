@@ -190,7 +190,7 @@ function swapJK(...filenames) {
     filenames.forEach((filename) => { 
         const filePath = path.join(bldSrc, path.sep, filename);
         console.log('swapping text for', filePath);
-        const file = fs.readFileSync(filePath).toString().replace(/@clubajax/g, '@janiking')
+        const file = fs.readFileSync(filePath).toString().replace(/clubajax/g, 'janiking')
         fs.writeFileSync(filePath, file);
     })
 }
